@@ -1,0 +1,36 @@
+name: Build AAB
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    
+    - name: Install dependencies
+      run: npm install --legacy-peer-deps
+    
+    - name: Setup Java
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'adopt'
+        java-version: '11'
+    
+    - name: Build AAB
+      run: cd android && ./gradlew bundleRelease
+    
+    - name: Upload AAB
+      uses: actions/upload-artifact@v3
+      with:
+        name: app-release.aab
+        path: android/app/build/outputs/bundle/release/app-release.aab

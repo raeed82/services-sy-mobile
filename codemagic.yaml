@@ -1,0 +1,39 @@
+workflows:
+  android-aab-build:
+    name: Build AAB for Google Play
+    instance_type: mac_mini_m1
+    max_build_duration: 120
+    environment:
+      node: 18
+      java: 11
+      xcode: latest
+    triggering:
+      events:
+        - push
+      branch:
+        patterns:
+          - pattern: main
+            include: true
+    scripts:
+      - name: Install dependencies
+        script: |
+          npm install --legacy-peer-deps
+      - name: Setup Expo
+        script: |
+          npm install -g expo-cli eas-cli
+      - name: Build AAB with EAS
+        script: |
+          export EXPO_TOKEN=$EXPO_TOKEN
+          eas build --platform android --non-interactive
+    artifacts:
+      - build/**/*.aab
+      - build/**/*.apk
+    publishing:
+      email:
+        enabled: true
+        recipients:
+          - $DEVELOPER_EMAIL
+      slack:
+        enabled: true
+        channel: '#builds'
+        notify_on_build_start: true
